@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div class="container">
+        <h2>empno</h2>
+        <input type="" id="empno">
+        <h2>ename</h2>
+        <input type="" id="ename">
+        <h2>job</h2>
+        <input type="" id="job">
+        <h2>sal</h2>
+        <input type="" id="sal">
+        <h2>mgr</h2>
+        <input type="" id="mgr">
+        <button type="button" id="btn">버튼!</button>
+    </div>
+</body>
+    <script
+    src="https://code.jquery.com/jquery-3.6.0.min.js"
+    integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+    crossorigin="anonymous"
+    ></script>
+    <script>
+        $('#btn').click(function(){
+            let jsonData = {
+                empno : $('#empno').val() ,
+                ename :  $('#ename').val() ,
+                job : $('#job').val() ,
+                sal : $('#sal').val() ,
+                mgr : $('#mgr').val()
+            }
+            console.log(jsonData)
+        })
+    </script>
+</html>
