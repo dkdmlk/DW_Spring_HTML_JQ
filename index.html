@@ -179,7 +179,8 @@
       }
       let empno = 7902;
       $.ajax({
-          url: "http://localhost:8080/emp/" + empno, //컨트롤러주소
+          url: "http://localhost:8080/spi/v1/emp/" + empno, //컨트롤러주소
+          // url: "http://localhost:8080/spi/v1/emp/" + empno,
           type : 'PATCH', //http 메소드 타입(GET,POST,DELETE,PATCH)
           contentType : 'application/json', // 서버에게 json 으로 요청
           dataType: "json", //서버의 결과를 json로 응답받는다
