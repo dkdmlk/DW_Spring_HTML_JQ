@@ -29,6 +29,38 @@
       crossorigin="anonymous"
     ></script>
     <script>
+      $('.login-btn').click(function(){
+        var userId = $('#userId').val().trim();
+        var userPassword = $('#userPassword').val().trim();
+        if(userId === ''){
+          alert('정보를 입력 해주세요.')
+          $('#userId').focus();
+          return false;
+        }
+        if(userPassword === ''){
+          alert('정보를 입력 해주세요.')
+          $('#userPassword').focus();
+          return false;
+        }
+        var jsonData = {
+          studentsName : userId,
+          studentsPassword : userPassword
+        }
+        $.ajax({
+          url : "http://localhost:8080/api/v1/login",
+          type : "POST",
+          contentType : "application/json",//서버에 json타입으로 요청
+          dataType : "json",//서버결과 json으로요청
+          data : JSON.stringify(jsonData),
+          success : function(reponse){
+            if(reponse){
+              location.href = 'board/index.html';
+            }else{
+              alert('비밀번호 혹은 이름이 틀렸습니다.')
+            }
+          } 
+        })
+      })
    </script>
   </body>
 </html>
