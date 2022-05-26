@@ -9,6 +9,7 @@
   </head>
   <body>
     <div class="container">
+      <!-- 글 작성 파업 -->
       <div class="write-popup">
         <div class="editor">
           <div class="input-box">
@@ -30,6 +31,35 @@
           <div class="btn-area">
             <a href="#" class="btn-cancel">취소</a>
             <a id="contentSubmit" href="#" class="btn-success">등록</a>
+          </div>
+        </div>
+      </div>
+      <!-- 글 작성 수정 -->
+      <div class="update-popup">
+        <div class="editor">
+          <div class="close">
+            <a href="#" class="btn-close">닫기</a>
+          </div>
+          <div class="input-box">
+            <label for="title">제목 : </label>
+            <input
+              id="upt-title"
+              type="text"
+              placeholder="제목을 입력하세요..."
+            />
+          </div>
+          <div class="input-box">
+            <textarea
+              id="upt-content"
+              rows="10"
+              cols="65"
+              placeholder="내용을 간단히 적어주세요..."
+            ></textarea>
+          </div>
+          <div class="btn-area">
+            <input type="hidden" id="boardIdHidden" />
+            <a id="contentUpdate" href="#" class="btn-update">수정</a>
+            <a id="contentDelete" href="#" class="btn-delete">삭제</a>
           </div>
         </div>
       </div>
@@ -218,6 +248,9 @@
     $(".btn-cancel").click(function () {
       $(".write-popup").css("display", "none");
     });
+    $(".btn-close").click(function () {
+      $(".update-popup").css("display", "none");
+    });
     // $('#contentSubmit').click(function(){
     //     if(confirm('게시글을 작성하시겠습니까?')){
     //         $('.write-popup').css('display', 'none');
@@ -255,7 +288,9 @@
               //   //     updateAt = "-";
               //   //   }
               html +=
-                "<tr><td>" +
+                "<tr onclick=getBoard(" +
+                response[i].boardId +
+                ")><td>" +
                 response[i].boardId +
                 "</td><td>" +
                 response[i].studentsName +
@@ -328,5 +363,84 @@
         }); //ajax끝
       } //if끝
     }); //함수끝
+
+    //클릭한 게시물 확인하는 함수
+    function getBoard(boardId) {
+      console.log(boardId);
+      $(".update-popup").css("display", "block");
+      //ajax 작성
+      $.ajax({
+        url: "http://localhost:8080/api/v1/board/boardId/" + boardId,
+        type: "GET",
+        dataType: "json",
+        success: function (response) {
+          console.log(response);
+          //3. input에 date set해주기
+          $("#upt-title").val(response.title);
+          $("#upt-content").val(response.content);
+          $("#boardIdHidden").val(boardId);
+        },
+      });
+    }
+
+    //게시물 수정 하는 함수
+    $("#contentUpdate").click(function () {
+      //1. 게시판 번호 확인
+      var boardId = $("#boardIdHidden").val(); //hidden에 숨겨둔 boardId가져오기.
+      //2. JSON생성
+      var title = $("#upt-title").val();
+      var content = $("#upt-content").val();
+
+      var jsonData = {
+        title: title,
+        content: content,
+      };
+      //3. AJAX
+      $.ajax({
+        url: "http://localhost:8080/api/v1/board/boardId/" + boardId,
+        type: "PATCH",
+        contentType: "application/json", //서버에 json타입으로 요청
+        dataType: "json", //서버결과 json으로요청
+        data: JSON.stringify(jsonData),
+        success: function (response) {
+          if (response > 0) {
+            alert("수정완료");
+            $(".update-popup").css("display", "none");
+            $("#tobdy").children().remove();
+            getBoardList();
+          }
+        },
+      });
+    });
+    //게시물 삭제
+    $("#contentDelete").click(function () {
+      //1. 게시판 번호 확인
+      var boardId = $("#boardIdHidden").val(); //hidden에 숨겨둔 boardId가져오기.
+      //2. JSON생성
+      var title = $("#upt-title").val();
+      var content = $("#upt-content").val();
+
+      var jsonData = {
+        title: title,
+        content: content,
+      };
+      //3. AJAX
+      $.ajax({
+        url: "http://localhost:8080/api/v1/board/boardId/" + boardId,
+        type: "DELETE",
+        contentType: "application/json", //서버에 json타입으로 요청
+        dataType: "json", //서버결과 json으로요청
+        data: JSON.stringify(jsonData),
+        success: function (response) {
+          if (response > 0) {
+            if (confirm("정말로 삭제하시겠습니까?")) {
+              $(".update-popup").css("display", "none");
+              $("#tobdy").children().remove();
+              getBoardList();
+            }
+          }
+        },
+      });
+    });
   </script>
 </html>

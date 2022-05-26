@@ -48,11 +48,11 @@
       a {
         cursor: pointer;
       }
-      .emp-enroll{
+      .emp-enroll {
         margin: 30px auto;
         text-align: center;
       }
-      .emp-enroll button{
+      .emp-enroll button {
         background-color: #eaeaeb;
         padding: 2%;
         cursor: pointer;
@@ -89,6 +89,7 @@
     crossorigin="anonymous"
   ></script>
   <script>
+    //********************************사원 조회 믿 HTML
     $.ajax({
       url: "http://localhost:8080/emp/all",
       type: "GET",
@@ -124,20 +125,21 @@
         console.log("에러내용은 ===>" + error);
       },
     });
-    function removeEmp(empno) { //사원삭제
-      if(confirm('정말로 사원을 삭제하겠습니까 ?')){ //confirm:타입boolean
+    function removeEmp(empno) {
+      //***************************사원 삭제
+      if (confirm("정말로 사원을 삭제하겠습니까 ?")) {
+        //confirm:타입boolean
         $.ajax({
           url: "http://localhost:8080/emp/empno/" + empno,
-          type : 'DELETE',
+          type: "DELETE",
           dataType: "json",
-          success : function(response){
-              if(response > 0){
+          success: function (response) {
+            if (response > 0) {
               location.reload();
-              }
-              else{
-                alert('삭제X');
-              }
-          }
+            } else {
+              alert("삭제X");
+            }
+          },
         });
       }
     }
@@ -151,45 +153,46 @@
       return count;
     }
 
-    $('#btn').click(function(){ //사원추가
+    $("#btn").click(function () {
+      //**************************사원추가
       let jsonData = {
-          "ename" : "홍길동",
-          "empno" : 8090,
-          "job" : "manager",
-          "sal" : 3000 ,
-          "deptno" : 20
+        ename: "홍길동",
+        empno: 8090,
+        job: "manager",
+        sal: 3000,
+        deptno: 20,
       };
       $.ajax({
-          url: "http://localhost:8080/emp" , 
-          type : 'POST',
-          contentType : 'application/json', // 보낼 때 json 으로
-          dataType: "json", //return값 json
-          data : JSON.stringify(jsonData),//JSON.stringify을 안해주면 json을 문자로 인식
-          success : function(response){
-            console.log(response);
-            location.reload();
-          }
-        });
-    })
-    //사원수정
-    $('#btn-Update').click(function(){
+        url: "http://localhost:8080/emp",
+        type: "POST",
+        contentType: "application/json", // 보낼 때 json 으로
+        dataType: "json", //return값 json
+        data: JSON.stringify(jsonData), //JSON.stringify을 안해주면 json을 문자로 인식
+        success: function (response) {
+          console.log(response);
+          location.reload();
+        },
+      });
+    });
+    //*********************************************사원수정
+    $("#btn-Update").click(function () {
       let jsonData = {
-        "job" : "manager",
-        "sal" : 5000
-      }
+        job: "manager",
+        sal: 5000,
+      };
       let empno = 7902;
       $.ajax({
-          url: "http://localhost:8080/spi/v1/emp/" + empno, //컨트롤러주소
-          // url: "http://localhost:8080/spi/v1/emp/" + empno,
-          type : 'PATCH', //http 메소드 타입(GET,POST,DELETE,PATCH)
-          contentType : 'application/json', // 서버에게 json 으로 요청
-          dataType: "json", //서버의 결과를 json로 응답받는다
-          data : JSON.stringify(jsonData),//JSON.stringify을 안해주면 json을 문자로 인식
-          success : function(response){
-            console.log(response);
-            location.reload();
-          }
-        });
-    })
+        url: "http://localhost:8080/spi/v1/emp/" + empno, //컨트롤러주소
+        // url: "http://localhost:8080/spi/v1/emp/" + empno,
+        type: "PATCH", //http 메소드 타입(GET,POST,DELETE,PATCH)
+        contentType: "application/json", // 서버에게 json 으로 요청
+        dataType: "json", //서버의 결과를 json로 응답받는다
+        data: JSON.stringify(jsonData), //JSON.stringify을 안해주면 json을 문자로 인식
+        success: function (response) {
+          console.log(response);
+          location.reload();
+        },
+      });
+    });
   </script>
 </html>
