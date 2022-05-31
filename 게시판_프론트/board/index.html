@@ -131,7 +131,7 @@
       <div class="cardBox">
         <div class="card">
           <div>
-            <div class="numbers">1,400</div>
+            <div id="studentsCnt" class="numbers">1,400</div>
             <div class="cardName">학생 수</div>
           </div>
           <div class="iconBx">
@@ -140,7 +140,7 @@
         </div>
         <div class="card">
           <div>
-            <div class="numbers">500</div>
+            <div id="boardCnt" class="numbers">500</div>
             <div class="cardName">게시글 수</div>
           </div>
           <div class="iconBx">
@@ -149,7 +149,7 @@
         </div>
         <div class="card">
           <div>
-            <div class="numbers">300</div>
+            <div id="WriterCnt" class="numbers">300</div>
             <div class="cardName">작성자 수</div>
           </div>
           <div class="iconBx">
@@ -158,7 +158,7 @@
         </div>
         <div class="card">
           <div>
-            <div class="numbers">2,800</div>
+            <div id="viewsCnt" class="numbers">2,800</div>
             <div class="cardName">총 조회 수</div>
           </div>
           <div class="iconBx">
@@ -272,6 +272,22 @@
     });
   </script>
   <script>
+    getBoardStatisticsa();
+    function getBoardStatisticsa() {
+      $.ajax({
+        url: "http://localhost:8080/api/v1/board/statisticsa",
+        type: "Get",
+        dataType: "json",
+        success: function (response) {
+          //text or html : input을 제외한 태그를 컨트롤 할때 사용
+          //val : input 컨트롤할떄 사용
+          $("#studentsCnt").text(response.studentsCnt);
+          $("#boardCnt").text(response.boardCnt);
+          $("#WriterCnt").text(response.WriterCnt);
+          $("#viewsCnt").text(response.viewsCnt);
+        },
+      });
+    }
     /*게시판 리스트 호출*/
     getBoardList();
     function getBoardList() {
@@ -280,7 +296,6 @@
         type: "GET",
         dataType: "json",
         success: function (response) {
-          console.log(response);
           let html = "";
           if (response.length > 0) {
             for (var i = 0; i < response.length; ++i) {
@@ -410,7 +425,6 @@
 
     //클릭한 게시물 확인하는 함수
     function getBoard(boardId) {
-      console.log(boardId);
       $(".update-popup").css("display", "block");
       //ajax 작성
       $.ajax({
@@ -418,7 +432,6 @@
         type: "GET",
         dataType: "json",
         success: function (response) {
-          console.log(response);
           //3. input에 date set해주기
           $("#upt-title").val(response.title);
           $("#upt-content").val(response.content);
@@ -597,6 +610,6 @@
           },
         });
       }
-    });
+    }); //서치 끝.
   </script>
 </html>
