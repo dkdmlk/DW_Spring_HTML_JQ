@@ -262,7 +262,7 @@
         var search = $("#searchBar").val(); //input에 작성한 작성자를가져옴
         //2. ajax호출
         $.ajax({
-          url: "http://localhost:8080/api/v1/board/search?writer=" + search,
+          url: "http://localhost:8080/api/v1/students/search?writer=" + search,
           type: "GET",
           dataType: "json",
           success: function (response) {
