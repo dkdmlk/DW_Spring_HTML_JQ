@@ -9,6 +9,31 @@
   </head>
   <body>
     <div class="container">
+      <div class="student-popup">
+        <div class="editor">
+          <div class="input-box">
+            <label for="studentsName">학생이름 : </label>
+            <input
+              id="studentsName"
+              type="text"
+              value=""
+              placeholder="이름을 입력하세요..."
+            />
+          </div>
+          <div class="input-box">
+            <label for="title">비밀번호 : </label>
+            <input
+              id="studentsPassword"
+              type="text"
+              placeholder="비밀번호를 입력하세요..."
+            />
+          </div>
+          <div class="btn-area">
+            <a href="#" class="btn-cancel">취소</a>
+            <a id="contentSubmit" href="#" class="btn-success">등록</a>
+          </div>
+        </div>
+      </div>
       <!-- 학생 정보 수정 -->
       <div class="update-popup">
         <div class="editor">
@@ -26,7 +51,7 @@
           <div class="input-box">
             <label for="studentsName">학생 이름 : </label>
             <input
-              id="studentsName"
+              id="studentsNameUp"
               type="text"
               placeholder="이름을 입력하세요..."
             />
@@ -34,7 +59,7 @@
           <div class="input-box">
             <label for="studentsPassword">학생 비밀번호 : </label>
             <input
-              id="studentsPassword"
+              id="studentsPasswordUp"
               type="text"
               placeholder="이름을 입력하세요..."
             />
@@ -115,6 +140,9 @@
         <div class="recentOrders">
           <div class="cardHeader">
             <h2>학생 명단</h2>
+            <button class="insertBtn" id="studentsIsertBtn" type="button">
+              학생 추가
+            </button>
           </div>
           <table>
             <thead>
@@ -182,6 +210,7 @@
   </script>
   <script>
     getStudentsList(1, 10);
+    //페이징 리스트
     function getStudentsList(pageNum, pageSize) {
       $.ajax({
         url:
@@ -193,13 +222,14 @@
         type: "GET",
         dataType: "json",
         success: function (response) {
-          console.log(response);
           let html = "";
           var len = response.list.length;
           if (len > 0) {
             for (var i = 0; i < len; ++i) {
               html +=
-                "<tr><td>" +
+                "<tr onclick=getBoard(" +
+                response.list[i].studentsId +
+                ")><td>" +
                 response.list[i].studentsId +
                 "</td><td>" +
                 response.list[i].studentsName +
@@ -254,10 +284,12 @@
           console.log("에러내용은 ===>" + error);
         },
       });
-    }
+    } //리스트끝
+
+    //학생서치
     $("#searchBar").keyup(function (key) {
       //엔터를 누를때(keycode => 13) hello world출력
-      if (key.keyCode == 13) {
+      if (key.keyCode === 13) {
         //1. input 값을 가져옴.
         var search = $("#searchBar").val(); //input에 작성한 작성자를가져옴
         //2. ajax호출
@@ -266,17 +298,20 @@
           type: "GET",
           dataType: "json",
           success: function (response) {
-            console.log(response);
             let html = "";
             if (response.length > 0) {
+              console.log(response.length);
               for (var i = 0; i < response.length; ++i) {
+                console.log();
                 html +=
-                  "<tr><td>" +
-                  response.list[i].studentsId +
+                  "<tr onclick=getBoard(" +
+                  response[i].studentsId +
+                  ")><td>" +
+                  response[i].studentsId +
                   "</td><td>" +
-                  response.list[i].studentsName +
+                  response[i].studentsName +
                   "</td><td>" +
-                  response.list[i].createAt +
+                  response[i].createAt +
                   "</td></tr>";
               }
             } else {
@@ -293,5 +328,133 @@
         });
       }
     }); //서치 끝.
+
+    //상세보기
+    function getBoard(studentsId) {
+      $(".update-popup").css("display", "block");
+      console.log(studentsId);
+      //ajax 작성
+      $.ajax({
+        url: "http://localhost:8080/api/v1/students/id/" + studentsId,
+        type: "GET",
+        dataType: "json",
+        success: function (response) {
+          // 3. input에 date set해주기
+          $("#studentsId").val(response.studentsId);
+          $("#studentsNameUp").val(response.studentsName);
+          $("#studentsPasswordUp").val(response.studentsPassword);
+          $("#boardIdHidden").val(studentsId);
+          getStudentsList(1, 10);
+        },
+      });
+    }
+    $(".btn-close").click(function () {
+      $(".update-popup").css("display", "none");
+    }); //상세보기끝
+
+    //학생수정
+    $("#contentUpdate").click(function () {
+      var studentsId = $("#boardIdHidden").val(); //hidden에 숨겨둔 studentsId 가져오기.
+      var studentsName = $("#studentsName").val();
+      var studentsPassword = $("#studentsPassword").val();
+      var jsonData = {
+        studentsName: studentsName,
+        studentsPassword: studentsPassword,
+      };
+      $.ajax({
+        url: "http://localhost:8080/api/v1/students/id/" + studentsId,
+        type: "PATCH",
+        contentType: "application/json", //서버에 json타입으로 요청
+        dataType: "json", //서버결과 json으로요청
+        data: JSON.stringify(jsonData),
+        success: function (response) {
+          if (response > 0) {
+            alert("수정 완료");
+            $(".update-popup").css("display", "none");
+            $("#boardData").children().remove();
+            getStudentsList(1, 10);
+          }
+        },
+      });
+    }); //수정끝
+
+    //학생삭제
+    $("#contentDelete").click(function () {
+      var studentsId = $("#boardIdHidden").val();
+      var studentsName = $("#studentsName").val();
+      var studentsPassword = $("#studentsPassword").val();
+      var jsonData = {
+        studentsName: studentsName,
+        studentsPassword: studentsPassword,
+      };
+      //3. AJAX
+      $.ajax({
+        url: "http://localhost:8080/api/v1/students/id/" + studentsId,
+        type: "DELETE",
+        contentType: "application/json", //서버에 json타입으로 요청
+        dataType: "json", //서버결과 json으로요청
+        data: JSON.stringify(jsonData),
+        success: function (response) {
+          if (response > 0) {
+            if (confirm("정말로 삭제하시겠습니까?")) {
+              $(".update-popup").css("display", "none");
+              $("#boardData").children().remove();
+              getStudentsList(1, 10);
+            }
+          }
+        },
+      });
+    }); //삭제끝
+
+    $("#studentsIsertBtn").click(function () {
+      $(".student-popup").css("display", "block");
+    });
+    $(".btn-cancel").click(function () {
+      $(".student-popup").css("display", "none");
+    });
+
+    //학생추가
+    $("#contentSubmit").click(function () {
+      if (confirm("학생을 추가하시겠습니까??")) {
+        var studentsName = $("#studentsName").val();
+        var studentsPassword = $("#studentsPassword").val();
+
+        if (studentsName == "") {
+          alert("학생 이름을 입력 해주세요");
+          $("studentsName").focus();
+          return false;
+        }
+        if (studentsPassword == "") {
+          alert("비밀번호를 입력 해주세요");
+          $("#studentsPassword").focus();
+          return false;
+        }
+
+        var jsonData = {
+          studentsName: studentsName,
+          studentsPassword: studentsPassword,
+        };
+
+        $.ajax({
+          url: "http://localhost:8080/api/v1/students",
+          type: "POST",
+          contentType: "application/json", //서버에 json타입으로 요청
+          dataType: "json", //서버결과 json으로요청
+          data: JSON.stringify(jsonData),
+          success: function (reponse) {
+            if (reponse > 0) {
+              //작성 화면 감추기
+              $(".student-popup").css("display", "none");
+              //내가 작성한 글 지우기
+              $("#studentsName").val("");
+              $("#studentsPassword").val("");
+
+              $("#boardData").children().remove();
+              getStudentsList(1, 10);
+            }
+          }, //success끝
+        }); //ajax끝
+      } //if끝
+    }); //추가끝
   </script>
 </html>
