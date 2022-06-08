@@ -121,6 +121,7 @@
               id="searchBar"
               placeholder="작성자를 검색하세요..."
             />
+            <input id="keyword" type="hidden" value="null" />
           </label>
         </div>
         <div>
@@ -291,13 +292,25 @@
     /*게시판 리스트 호출*/
     getBoardList(1, 10);
     function getBoardList(pageNum, pageSize) {
-      $.ajax({
-        url:
-          "http://localhost:8080/api/v1/board?pageNum=" +
+      var controllUrl =
+        "http://localhost:8080/api/v1/board?pageNum=" +
+        pageNum +
+        "&pageSize=" +
+        pageSize +
+        " ";
+      var keyword = $("#keyword").val();
+      if (keyword != "null") {
+        controllUrl =
+          "http://localhost:8080/api/v1/board/search?writer=" +
+          keyword +
+          "&pageNum=" +
           pageNum +
-          "&pageSize= " +
+          "&pageSize=" +
           pageSize +
-          " ",
+          " ";
+      }
+      $.ajax({
+        url: controllUrl,
         type: "GET",
         dataType: "json",
         success: function (response) {
@@ -564,21 +577,35 @@
     2. 누른 키를 뗄 때 -> key up
     3. 키보드를 계속 누르고 있을 때 -> keypress*/
     $("#searchBar").keyup(function (key) {
+      var pageNum = 1;
+      var pageSize = 10;
+      var search = $("#searchBar").val().trim(); //inp에 작성한 작성자를 가져옴
+      if (search != "") {
+        $("#keyword").val(search);
+      }
       //엔터를 누를때(keycode => 13) hello world출력
       if (key.keyCode == 13) {
         //1. input 값을 가져옴.
         var search = $("#searchBar").val(); //input에 작성한 작성자를가져옴
         //2. ajax호출
         $.ajax({
-          url: "http://localhost:8080/api/v1/board/search?writer=" + search,
+          url:
+            "http://localhost:8080/api/v1/board/search?writer=" +
+            search +
+            "&pageNum=" +
+            pageNum +
+            "&pageSize=" +
+            pageSize +
+            " ",
           type: "GET",
           dataType: "json",
           success: function (response) {
             console.log(response);
-            let html = "";
-            if (response.length > 0) {
-              for (var i = 0; i < response.length; ++i) {
-                var views = response[i].cnt;
+            var len = response.list.length;
+            var html = "";
+            if (len > 0) {
+              for (var i = 0; i < len; ++i) {
+                var views = response.list[i].cnt;
                 //   var updateAt = response[i].updateAt;
                 //   if (response[i].updateAt === undefined) {
                 //     response[i].updateAt = "-";
@@ -589,59 +616,95 @@
                 if (views < 10) {
                   html +=
                     "<tr onclick=getBoard(" +
-                    response[i].boardId +
+                    response.list[i].boardId +
                     ")><td>" +
-                    response[i].boardId +
+                    response.list[i].boardId +
                     "</td><td>" +
-                    response[i].studentsName +
+                    response.list[i].studentsName +
                     "</td><td>" +
-                    response[i].title +
+                    response.list[i].title +
                     "</td><td>" +
-                    response[i].updateAt +
+                    response.list[i].updateAt +
                     "</td><td> " +
-                    response[i].createAt +
+                    response.list[i].createAt +
                     "</td><td> <span class=row>" +
-                    response[i].cnt +
+                    response.list[i].cnt +
                     "</span> </td></tr>";
                 }
                 if (views >= 10 && views < 20) {
                   html +=
                     "<tr onclick=getBoard(" +
-                    response[i].boardId +
+                    response.list[i].boardId +
                     ")><td>" +
-                    response[i].boardId +
+                    response.list[i].boardId +
                     "</td><td>" +
-                    response[i].studentsName +
+                    response.list[i].studentsName +
                     "</td><td>" +
-                    response[i].title +
+                    response.list[i].title +
                     "</td><td>" +
-                    response[i].updateAt +
+                    response.list[i].updateAt +
                     "</td><td> " +
-                    response[i].createAt +
+                    response.list[i].createAt +
                     "</td><td> <span class=middle>" +
-                    response[i].cnt +
+                    response.list[i].cnt +
                     "</span> </td></tr>";
                 }
                 if (views >= 20) {
                   html +=
                     "<tr onclick=getBoard(" +
-                    response[i].boardId +
+                    response.list[i].boardId +
                     ")><td>" +
-                    response[i].boardId +
+                    response.list[i].boardId +
                     "</td><td>" +
-                    response[i].studentsName +
+                    response.list[i].studentsName +
                     "</td><td>" +
-                    response[i].title +
+                    response.list[i].title +
                     "</td><td>" +
-                    response[i].updateAt +
+                    response.list[i].updateAt +
                     "</td><td> " +
-                    response[i].createAt +
+                    response.list[i].createAt +
                     "</td><td> <span class=high>" +
-                    response[i].cnt +
+                    response.list[i].cnt +
                     "</span> </td></tr>";
                 }
                 //아래 조회수 로직 구현 예정
               }
+
+              var paginationHtml = "";
+              if (response.hasPreviousPage) {
+                //이전 페이지가 true 라면
+                paginationHtml +=
+                  '<a onclick="getBoardList(' +
+                  (response.pageNum - 1) +
+                  "," +
+                  pageSize +
+                  ')"href="#">Previous</a>';
+              }
+              for (var i = 0; i < response.navigatepageNums.length; i++) {
+                //페이지 번호 길이 만큼 for문 실행
+                paginationHtml +=
+                  '<a id ="pageNum' +
+                  response.navigatepageNums[i] +
+                  '" onclick="getBoardList(' +
+                  response.navigatepageNums[i] +
+                  "," +
+                  pageSize +
+                  ')" href="#">' +
+                  response.navigatepageNums[i] +
+                  "</a>";
+              }
+              if (response.hasNextPage) {
+                //다음 페이지가 true 라면
+                paginationHtml +=
+                  '<a onclick="getBoardList(' +
+                  (response.pageNum + 1) +
+                  ',10)"href="#">Next</a>';
+              }
+              $(".pagination").children().remove();
+              $(".pagination").append(paginationHtml);
+              //페이지 번호에 맞게 css 수정
+              $("#pageNum" + pageNum).css("background-color", "#287bff");
+              $("#pageNum" + pageNum).css("color", "#fff");
             } else {
               //게시글 없음 로직 구현
               html +=

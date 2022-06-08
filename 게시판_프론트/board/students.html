@@ -129,6 +129,7 @@
               type="text"
               placeholder="학생이름을 검색하세요..."
             />
+            <input id="keyword" type="hidden" value="null" />
           </label>
         </div>
         <div>
@@ -212,13 +213,25 @@
     getStudentsList(1, 10);
     //페이징 리스트
     function getStudentsList(pageNum, pageSize) {
-      $.ajax({
-        url:
-          "http://localhost:8080/api/v1/students?pageNum=" +
+      var controllUrl =
+        "http://localhost:8080/api/v1/students?pageNum=" +
+        pageNum +
+        "&pageSize=" +
+        pageSize +
+        " ";
+      var keyword = $("#keyword").val();
+      if (keyword != "null") {
+        controllUrl =
+          "http://localhost:8080/api/v1/students/search/searchPage?writer=" +
+          keyword +
+          "&pageNum=" +
           pageNum +
-          "&pageSize= " +
+          "&pageSize=" +
           pageSize +
-          " ",
+          " ";
+      }
+      $.ajax({
+        url: controllUrl,
         type: "GET",
         dataType: "json",
         success: function (response) {
@@ -288,96 +301,100 @@
 
     //학생서치
 
-    getsearchPage(1, 10);
-    function getsearchPage(pageNum, pageSize) {
-      //학생서치
-      $("#searchBar").keyup(function (key) {
-        //엔터를 누를때(keycode => 13) hello world출력
-        if (key.keyCode === 13) {
-          //1. input 값을 가져옴.
-          var search = $("#searchBar").val(); //input에 작성한 작성자를가져옴
-          if (search == "") {
-            alert("검색어를 입력해주세요");
-            return false;
-          }
-
-          //2. ajax호출
-          $.ajax({
-            url:
-              "http://localhost:8080/api/v1/students/search/searchPage?writer=" +
-              search +
-              "&pageNum=" +
-              pageNum +
-              "&pageSize=" +
-              pageSize +
-              " ",
-            type: "GET",
-            dataType: "json",
-            success: function (response) {
-              let html = "";
-              if (response.list.length > 0) {
-                for (var i = 0; i < response.list.length; ++i) {
-                  html +=
-                    "<tr onclick=getBoard(" +
-                    response.list[i].studentsId +
-                    ")><td>" +
-                    response.list[i].studentsId +
-                    "</td><td>" +
-                    response.list[i].studentsName +
-                    "</td><td>" +
-                    response.list[i].createAt +
-                    "</td></tr>";
-                }
-                var paginationHtml = "";
-                if (response.hasPreviousPage) {
-                  //이전 페이지가 true 라면
-                  paginationHtml +=
-                    '<a onclick="getStudentsList(' +
-                    (response.pageNum - 1) +
-                    "," +
-                    pageSize +
-                    ')"href="#">Previous</a>';
-                }
-                for (var i = 0; i < response.navigatepageNums.length; i++) {
-                  //페이지 번호 길이 만큼 for문 실행
-                  paginationHtml +=
-                    '<a id ="pageNum' +
-                    response.navigatepageNums[i] +
-                    '" onclick="getStudentsList(' +
-                    response.navigatepageNums[i] +
-                    "," +
-                    pageSize +
-                    ')" href="#">' +
-                    response.navigatepageNums[i] +
-                    "</a>";
-                }
-                if (response.hasNextPage) {
-                  //다음 페이지가 true 라면
-                  paginationHtml +=
-                    '<a onclick="getStudentsList(' +
-                    (response.pageNum + 1) +
-                    ',10)"href="#">Next</a>';
-                }
-                $(".pagination").children().remove();
-                $(".pagination").append(paginationHtml);
-                //페이지 번호에 맞게 css 수정
-                $("#pageNum" + pageNum).css("background-color", "#287bff");
-                $("#pageNum" + pageNum).css("color", "#fff");
-              } else {
-                //게시글 없음 로직 구현
-                html +=
-                  '<tr><td colspan=6 style="text-align:center;"><h2>게시글이 없습니다.</h2></td></tr>';
-              }
-              $("#boardData").children().remove();
-              $("#boardData").append(html);
-            },
-            error: function (request, status, error) {
-              console.log("에러내용은 ===>" + error);
-            },
-          });
+    //학생서치
+    $("#searchBar").keyup(function (key) {
+      //엔터를 누를때(keycode => 13) hello world출력
+      var pageNum = 1;
+      var pageSize = 10;
+      var search = $("#searchBar").val().trim(); //inp에 작성한 작성자를 가져옴
+      if (search != "") {
+        $("#keyword").val(search);
+      }
+      if (key.keyCode === 13) {
+        //1. input 값을 가져옴.
+        var search = $("#searchBar").val(); //input에 작성한 작성자를가져옴
+        if (search == "") {
+          alert("검색어를 입력해주세요");
+          return false;
         }
-      }); //서치 끝.
-    }
+
+        //2. ajax호출
+        $.ajax({
+          url:
+            "http://localhost:8080/api/v1/students/search/searchPage?writer=" +
+            search +
+            "&pageNum=" +
+            pageNum +
+            "&pageSize=" +
+            pageSize +
+            " ",
+          type: "GET",
+          dataType: "json",
+          success: function (response) {
+            let html = "";
+            if (response.list.length > 0) {
+              for (var i = 0; i < response.list.length; ++i) {
+                html +=
+                  "<tr onclick=getBoard(" +
+                  response.list[i].studentsId +
+                  ")><td>" +
+                  response.list[i].studentsId +
+                  "</td><td>" +
+                  response.list[i].studentsName +
+                  "</td><td>" +
+                  response.list[i].createAt +
+                  "</td></tr>";
+              }
+              var paginationHtml = "";
+              if (response.hasPreviousPage) {
+                //이전 페이지가 true 라면
+                paginationHtml +=
+                  '<a onclick="getStudentsList(' +
+                  (response.pageNum - 1) +
+                  "," +
+                  pageSize +
+                  ')"href="#">Previous</a>';
+              }
+              for (var i = 0; i < response.navigatepageNums.length; i++) {
+                //페이지 번호 길이 만큼 for문 실행
+                paginationHtml +=
+                  '<a id ="pageNum' +
+                  response.navigatepageNums[i] +
+                  '" onclick="getStudentsList(' +
+                  response.navigatepageNums[i] +
+                  "," +
+                  pageSize +
+                  ')" href="#">' +
+                  response.navigatepageNums[i] +
+                  "</a>";
+              }
+              if (response.hasNextPage) {
+                //다음 페이지가 true 라면
+                paginationHtml +=
+                  '<a onclick="getStudentsList(' +
+                  (response.pageNum + 1) +
+                  ',10)"href="#">Next</a>';
+              }
+              $(".pagination").children().remove();
+              $(".pagination").append(paginationHtml);
+              //페이지 번호에 맞게 css 수정
+              $("#pageNum" + pageNum).css("background-color", "#287bff");
+              $("#pageNum" + pageNum).css("color", "#fff");
+            } else {
+              //게시글 없음 로직 구현
+              html +=
+                '<tr><td colspan=6 style="text-align:center;"><h2>게시글이 없습니다.</h2></td></tr>';
+            }
+            $("#boardData").children().remove();
+            $("#boardData").append(html);
+          },
+          error: function (request, status, error) {
+            console.log("에러내용은 ===>" + error);
+          },
+        });
+      }
+    }); //서치 끝.
+
     //상세보기
     function getBoard(studentsId) {
       $(".update-popup").css("display", "block");
