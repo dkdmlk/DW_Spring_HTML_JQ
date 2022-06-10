@@ -319,6 +319,7 @@
           var len = response.list.length;
           if (len > 0) {
             for (var i = 0; i < len; ++i) {
+              
               var views = response.list[i].cnt;
               //   var updateAt = response[i].updateAt;
               //   if (response[i].updateAt === undefined) {
@@ -718,6 +719,7 @@
         });
       }
     }); //서치 끝.
+    
     getPageNum();
     function getPageNum() {
       //pageNum
